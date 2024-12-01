@@ -5,7 +5,21 @@ const app = express();
 const morgan = require('morgan');
 const { PORT = 3000 } = process.env;
 // TODO - require express-openid-connect and destructure auth from it
-
+const {
+  AUTH0_SECRET = 'a long, randomly-generated string stored in env', // generate one by using: `openssl rand -base64 32`
+  AUTH0_AUDIENCE = 'http://localhost:3000',
+  AUTH0_CLIENT_ID,
+  AUTH0_BASE_URL,
+  } = process.env;
+  
+  const config = {
+  authRequired: true, // this is different from the documentation
+  auth0Logout: true,
+  secret: AUTH0_SECRET,
+  baseURL: AUTH0_AUDIENCE,
+  clientID: AUTH0_CLIENT_ID,
+  issuerBaseURL: AUTH0_BASE_URL,
+  };
 const { User, Cupcake } = require('./db');
 
 // middleware
