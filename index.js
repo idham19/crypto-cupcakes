@@ -4,16 +4,18 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const { PORT = 3000 } = process.env;
+const { auth } = require('express-openid-connect');
+
 // TODO - require express-openid-connect and destructure auth from it
 const {
-  AUTH0_SECRET = 'a long, randomly-generated string stored in env', // generate one by using: `openssl rand -base64 32`
-  AUTH0_AUDIENCE = 'http://localhost:3000',
+  AUTH0_SECRET,
+  AUTH0_AUDIENCE,
   AUTH0_CLIENT_ID,
   AUTH0_BASE_URL,
-  } = process.env;
+} = process.env;
   
   const config = {
-  authRequired: true, // this is different from the documentation
+  authRequired: true, 
   auth0Logout: true,
   secret: AUTH0_SECRET,
   baseURL: AUTH0_AUDIENCE,
@@ -34,7 +36,18 @@ app.use(express.urlencoded({extended:true}));
   // define the config object
   // attach Auth0 OIDC auth router
   // create a GET / route handler that sends back Logged in or Logged out
+  app.use(auth(config));
 
+  // Create a GET / route handler
+  app.get('/', (req, res) => {
+    if (req.oidc.isAuthenticated()) {
+      // If the user is logged in, display a message with their information
+      res.send(`Logged in as ${req.oidc.user.name}`);
+    } else {
+      // If the user is not logged in, provide a "Logged out" message
+      res.send('Logged out');
+    }
+  });
 app.get('/cupcakes', async (req, res, next) => {
   try {
     const cupcakes = await Cupcake.findAll();
